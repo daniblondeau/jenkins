@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  jenkins:
+    privileged: true
+    build:
+      context: ./image
+      args:
+        JAVA_OPTS: '-Djenkins.CLI.disable=true'
+    ports:
+      - 8080:8080
+      - 50000:50000
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - ./config:/var/casc_config
+      - ./jobs:/var/jobs
+    secrets:
+      - admin
+      - github_user
+      - github_pass
+      - aws_ak_id
+      - aws_ak_secret
+    environment:
+      - CASC_JENKINS_CONFIG=/var/casc_config/jenkins.yml
+secrets:
+  admin:
+    file: ./secrets/admin_pass
+  github_user:
+    file: ./secrets/github_user
+  github_pass:
+    file: ./secrets/github_pass
+  aws_ak_id:
+    file: ./secrets/aws_ak_id
+  aws_ak_secret:
+    file: ./secrets/aws_ak_secret
+
+volumes:
+  jenkins_home:

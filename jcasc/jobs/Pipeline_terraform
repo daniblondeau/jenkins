@@ -1,0 +1,25 @@
+pipeline {
+    agent any
+    
+    tools {
+        terraform 'terraform'
+    }
+    
+    stages {
+        stage('Build'){
+            steps{
+                echo 'building...'
+                git credentialsId: 'GitHub', url: 'https://github.globant.com/daniel-lalicata/test.git'
+                sh 'terraform init'
+            }
+        }
+        
+        stage('Test'){
+            steps{
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'AWS', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+                    sh 'terraform plan'
+                }
+            }
+        }
+    }
+}

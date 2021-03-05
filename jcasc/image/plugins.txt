@@ -1,0 +1,14 @@
+configuration-as-code:latest
+credentials:latest
+git:latest
+ssh-slaves:latest
+matrix-auth:latest
+job-dsl:latest
+mailer:latest
+text-finder:latest
+timestamper:latest
+workflow-aggregator:latest
+blueocean:latest
+authorize-project:latest
+aws-credentials:latest
+terraform:latest

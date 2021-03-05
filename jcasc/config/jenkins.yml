@@ -1,0 +1,137 @@
+jenkins:
+  systemMessage: "Academy - Jenkins Configuration as Code"
+
+  numExecutors: 1
+  mode: NORMAL
+  scmCheckoutRetryCount: 3
+  labelString: "master-label"
+
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+       - id: admin
+         password: ${admin}
+
+  authorizationStrategy:
+    globalMatrix:
+      grantedPermissions:
+        - "Overall/Read:anonymous"
+        - "Overall/Administer:authenticated"
+
+  remotingSecurity:
+    enabled: true
+
+# JOBS - pipelines
+jobs:
+  - script: >
+      folder ('Academy')
+# First, create a folder to then add the job
+  - script: >
+      job('Academy/test'){
+        steps {
+          shell('echo Hello World!')
+        }
+      }
+
+  - script: >
+      pipelineJob('pipeline-github') {
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote {
+                  url('https://github.globant.com/daniel-lalicata/Jenkins.git')
+                  credentials('GitHub')
+                }
+                branch('*/master')
+                scriptPath('jcasc/jobs/Jenkinsfile_steps')
+              }
+            }
+            lightweight()
+          }
+        }
+      }
+
+  - script: >
+      pipelineJob('groovy-github') {
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote {
+                  url('https://github.globant.com/daniel-lalicata/Jenkins.git')
+                  credentials('GitHub')
+                }
+                branch('*/master')
+                scriptPath('jcasc/jobs/helloworld.groovy')
+              }
+            }
+            lightweight()
+          }
+        }
+      }
+
+  - script: >
+      pipelineJob('terraform-github') {
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote {
+                  url('https://github.globant.com/daniel-lalicata/Jenkins.git')
+                  credentials('GitHub')
+                }
+                branch('*/master')
+                scriptPath('jcasc/jobs/Jenkinsfile')
+              }
+            }
+            lightweight()
+          }
+        }
+      }
+
+
+# NOT WORKING - adding files and reloading JCasC
+  # - file: ./var/jobs
+
+# WATCH OUT INDENTATION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+unclassified:
+  location:
+    url: http://127.0.0.1:8080/
+    adminAddress: your@email.com
+  resourceRoot:
+    url: http://127.0.0.1:8080/
+
+security:
+  queueItemAuthenticator:
+    authenticators:
+      - global:
+          strategy: triggeringUsersAuthorizationStrategy
+
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - usernamePassword:
+              scope: GLOBAL
+              id: GitHub
+              username: "${github_user}"
+              password: "${github_pass}"
+              description: "GitHub Credentials"
+          - usernamePassword:
+              scope: GLOBAL
+              id: AWS
+              username: "${aws_ak_id}"
+              password: "${aws_ak_secret}"
+              description: "AWS Credentials"
+
+tool:
+  terraform:
+    installations:
+      - name: terraform
+        properties:
+          - installSource:
+              installers:
+                - terraformInstaller:
+                    id: "0.14.2-linux-amd64"
